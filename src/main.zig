@@ -37,6 +37,10 @@ pub fn main() !void {
     const resizeCallback = c.glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     _ = resizeCallback;
 
+    runRenderLoop(window);
+}
+
+fn runRenderLoop(window: ?*c.GLFWwindow) void {
     while (c.glfwWindowShouldClose(window) == 0) {
         processInput(window);
         c.glfwSwapBuffers(window);

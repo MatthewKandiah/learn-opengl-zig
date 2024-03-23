@@ -42,12 +42,24 @@ pub fn main() !void {
     vertex_shader = c.glCreateShader(c.GL_VERTEX_SHADER);
     c.glShaderSource(vertex_shader, 1, &vertex_shader_source, null);
     c.glCompileShader(vertex_shader);
-    var shader_compilation_succeeded: c_int = undefined;
-    c.glGetShaderiv(vertex_shader, c.GL_COMPILE_STATUS, &shader_compilation_succeeded);
-    if (shader_compilation_succeeded == 0) {
+    var vertex_shader_compilation_succeeded: c_int = undefined;
+    c.glGetShaderiv(vertex_shader, c.GL_COMPILE_STATUS, &vertex_shader_compilation_succeeded);
+    if (vertex_shader_compilation_succeeded == 0) {
         var shader_compilation_error_log: [512]u8 = undefined;
         c.glGetShaderInfoLog(vertex_shader, 512, null, &shader_compilation_error_log);
         std.debug.panic("Vertex shader compilation failed\n{s}", .{shader_compilation_error_log});
+    }
+
+    var fragment_shader: c_uint = undefined;
+    fragment_shader = c.glCreateShader(c.GL_FRAGMENT_SHADER);
+    c.glShaderSource(fragment_shader, 1, &fragment_shader_source, null);
+    c.glCompileShader(fragment_shader);
+    var fragment_shader_compilation_succeeded: c_int = undefined;
+    c.glGetShaderiv(fragment_shader, c.GL_COMPILE_STATUS, &fragment_shader_compilation_succeeded);
+    if (fragment_shader_compilation_succeeded == 0) {
+        var shader_compilation_error_log: [512]u8 = undefined;
+        c.glGetShaderInfoLog(fragment_shader, 512, null, &shader_compilation_error_log);
+        std.debug.panic("Fragment shader compilation failed\n{s}", .{shader_compilation_error_log});
     }
 
     runRenderLoop(window);
@@ -60,6 +72,16 @@ const vertex_shader_source: [*c]const u8 =
     \\void main()
     \\{
     \\  gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    \\}
+;
+
+const fragment_shader_source: [*c]const u8 =
+    \\#version 330 core
+    \\out vec4 FragColor;
+    \\
+    \\void main()
+    \\{
+    \\  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
     \\}
 ;
 

@@ -15,7 +15,11 @@ pub fn main() !void {
         c.glfwTerminate();
     }
 
-    setWindowHints();
+    _ = c.glfwWindowHint(c.GLFW_CONTEXT_VERSION_MAJOR, 3);
+    _ = c.glfwWindowHint(c.GLFW_CONTEXT_VERSION_MINOR, 3);
+    _ = c.glfwWindowHint(c.GLFW_OPENGL_PROFILE, c.GLFW_OPENGL_CORE_PROFILE);
+    // to build on mac, you may need to uncomment this line
+    // _ = c.glfwWindowHint(c.GLFW_OPENGL_FORWARD_COMPAT, c.GL_TRUE);
 
     var window = c.glfwCreateWindow(800, 600, "LearnOpenGL", null, null);
     if (window == null) {
@@ -71,13 +75,13 @@ pub fn main() !void {
     const vertices = [9]f32{ -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, 0.0 };
 
     var vao: c_uint = undefined;
-    var vbo: c_uint = undefined;
     c.glGenVertexArrays(1, &vao);
+    var vbo: c_uint = undefined;
     c.glGenBuffers(1, &vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
 
     c.glBindVertexArray(vao);
     c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
+    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
 
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 0, @ptrFromInt(0));
     c.glEnableVertexAttribArray(0);
@@ -116,14 +120,6 @@ const fragment_shader_source: [*c]const u8 =
     \\  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
     \\}
 ;
-
-fn setWindowHints() void {
-    _ = c.glfwWindowHint(c.GLFW_CONTEXT_VERSION_MAJOR, 3);
-    _ = c.glfwWindowHint(c.GLFW_CONTEXT_VERSION_MINOR, 3);
-    _ = c.glfwWindowHint(c.GLFW_OPENGL_PROFILE, c.GLFW_OPENGL_CORE_PROFILE);
-    // to build on mac, you may need to uncomment this line
-    // _ = c.glfwWindowHint(c.GLFW_OPENGL_FORWARD_COMPAT, c.GL_TRUE);
-}
 
 fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
     _ = window;

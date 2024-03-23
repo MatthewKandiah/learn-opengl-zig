@@ -1,1 +1,2 @@
+- following https://learnopengl.com/Introduction tutorials
 - install glfw 3.4 with your package manager

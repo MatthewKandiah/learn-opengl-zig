@@ -1,24 +1,50 @@
 const std = @import("std");
 
+const c = @cImport({
+    @cInclude("glad/glad.h");
+    @cInclude("GLFW/glfw3.h");
+});
+
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    const init_ok = c.glfwInit();
+    if (init_ok == 0) {
+        std.debug.panic("Failed to initialise GLFW\n", .{});
+    }
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    defer {
+        c.glfwTerminate();
+    }
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    _ = c.glfwWindowHint(c.GLFW_CONTEXT_VERSION_MAJOR, 3);
+    _ = c.glfwWindowHint(c.GLFW_CONTEXT_VERSION_MINOR, 3);
+    _ = c.glfwWindowHint(c.GLFW_OPENGL_PROFILE, c.GLFW_OPENGL_CORE_PROFILE);
+    // to build on mac, you may need to uncomment this line
+    // _ = c.glfwWindowHint(c.GLFW_OPENGL_FORWARD_COMPAT, c.GL_TRUE);
 
-    try bw.flush(); // don't forget to flush!
+    var window = c.glfwCreateWindow(800, 600, "LearnOpenGL", null, null);
+    if (window == null) {
+        std.debug.panic("Failed to create GLFW window.\n", .{});
+    }
+
+    c.glfwMakeContextCurrent(window);
+
+    if (c.gladLoadGLLoader(@ptrCast(&c.glfwGetProcAddress)) == 0) {
+        std.debug.panic("Failed to initialize GLAD\n", .{});
+    }
+
+    c.glViewport(0, 0, 800, 600);
+
+    const resizeCallback = c.glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    _ = resizeCallback;
+
+    while (c.glfwWindowShouldClose(window) == 0) {
+        std.debug.print("running\n", .{});
+        c.glfwSwapBuffers(window);
+        c.glfwPollEvents();
+    }
 }
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+fn framebuffer_size_callback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
+    _ = window;
+    c.glViewport(0, 0, width, height);
 }

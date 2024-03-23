@@ -34,17 +34,23 @@ pub fn main() !void {
 
     c.glViewport(0, 0, 800, 600);
 
-    const resizeCallback = c.glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    const resizeCallback = c.glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     _ = resizeCallback;
 
     while (c.glfwWindowShouldClose(window) == 0) {
-        std.debug.print("running\n", .{});
+        processInput(window);
         c.glfwSwapBuffers(window);
         c.glfwPollEvents();
     }
 }
 
-fn framebuffer_size_callback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
+fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {
     _ = window;
     c.glViewport(0, 0, width, height);
+}
+
+fn processInput(window: ?*c.GLFWwindow) callconv(.C) void {
+    if (c.glfwGetKey(window, c.GLFW_KEY_ESCAPE) == c.GLFW_PRESS) {
+        c.glfwSetWindowShouldClose(window, 1);
+    }
 }

@@ -1,0 +1,1 @@
+- install glfw 3.4 with your package manager

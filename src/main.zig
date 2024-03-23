@@ -43,6 +43,10 @@ pub fn main() !void {
 fn runRenderLoop(window: ?*c.GLFWwindow) void {
     while (c.glfwWindowShouldClose(window) == 0) {
         processInput(window);
+
+        c.glClearColor(0.3, 0.0, 0.6, 1.0);
+        c.glClear(c.GL_COLOR_BUFFER_BIT);
+
         c.glfwSwapBuffers(window);
         c.glfwPollEvents();
     }

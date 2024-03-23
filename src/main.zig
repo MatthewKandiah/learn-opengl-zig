@@ -32,14 +32,7 @@ pub fn main() !void {
 
     _ = c.glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    const vertices = [9]f32{ -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, 0.0 };
-    var vbo: c_uint = undefined;
-    c.glGenBuffers(1, &vbo);
-    c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
-
-    var vertex_shader: c_uint = undefined;
-    vertex_shader = c.glCreateShader(c.GL_VERTEX_SHADER);
+    const vertex_shader = c.glCreateShader(c.GL_VERTEX_SHADER);
     c.glShaderSource(vertex_shader, 1, &vertex_shader_source, null);
     c.glCompileShader(vertex_shader);
     var vertex_shader_compilation_succeeded: c_int = undefined;
@@ -50,8 +43,7 @@ pub fn main() !void {
         std.debug.panic("Vertex shader compilation failed\n{s}", .{shader_compilation_error_log});
     }
 
-    var fragment_shader: c_uint = undefined;
-    fragment_shader = c.glCreateShader(c.GL_FRAGMENT_SHADER);
+    const fragment_shader = c.glCreateShader(c.GL_FRAGMENT_SHADER);
     c.glShaderSource(fragment_shader, 1, &fragment_shader_source, null);
     c.glCompileShader(fragment_shader);
     var fragment_shader_compilation_succeeded: c_int = undefined;
@@ -62,7 +54,47 @@ pub fn main() !void {
         std.debug.panic("Fragment shader compilation failed\n{s}", .{shader_compilation_error_log});
     }
 
-    runRenderLoop(window);
+    var shader_program: c_uint = c.glCreateProgram();
+    c.glAttachShader(shader_program, vertex_shader);
+    c.glAttachShader(shader_program, fragment_shader);
+    c.glLinkProgram(shader_program);
+    var shader_program_linking_succeeded: c_int = undefined;
+    c.glGetProgramiv(shader_program, c.GL_LINK_STATUS, &shader_program_linking_succeeded);
+    if (shader_program_linking_succeeded == 0) {
+        var shader_linking_error_log: [512]u8 = undefined;
+        c.glGetShaderInfoLog(shader_program, 512, null, &shader_linking_error_log);
+        std.debug.panic("Shader program linking failed\n{s}", .{shader_linking_error_log});
+    }
+    c.glDeleteShader(vertex_shader);
+    c.glDeleteShader(fragment_shader);
+
+    const vertices = [9]f32{ -0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, 0.0 };
+
+    var vao: c_uint = undefined;
+    var vbo: c_uint = undefined;
+    c.glGenVertexArrays(1, &vao);
+    c.glGenBuffers(1, &vbo);
+    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
+
+    c.glBindVertexArray(vao);
+    c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
+
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 0, @ptrFromInt(0));
+    c.glEnableVertexAttribArray(0);
+
+    while (c.glfwWindowShouldClose(window) == 0) {
+        processInput(window);
+
+        c.glClearColor(0.3, 0.0, 0.6, 1.0);
+        c.glClear(c.GL_COLOR_BUFFER_BIT);
+
+        c.glUseProgram(shader_program);
+        c.glBindVertexArray(vao);
+        c.glDrawArrays(c.GL_TRIANGLES, 0, 3);
+
+        c.glfwSwapBuffers(window);
+        c.glfwPollEvents();
+    }
 }
 
 const vertex_shader_source: [*c]const u8 =
@@ -91,18 +123,6 @@ fn setWindowHints() void {
     _ = c.glfwWindowHint(c.GLFW_OPENGL_PROFILE, c.GLFW_OPENGL_CORE_PROFILE);
     // to build on mac, you may need to uncomment this line
     // _ = c.glfwWindowHint(c.GLFW_OPENGL_FORWARD_COMPAT, c.GL_TRUE);
-}
-
-fn runRenderLoop(window: ?*c.GLFWwindow) void {
-    while (c.glfwWindowShouldClose(window) == 0) {
-        processInput(window);
-
-        c.glClearColor(0.3, 0.0, 0.6, 1.0);
-        c.glClear(c.GL_COLOR_BUFFER_BIT);
-
-        c.glfwSwapBuffers(window);
-        c.glfwPollEvents();
-    }
 }
 
 fn framebufferSizeCallback(window: ?*c.GLFWwindow, width: c_int, height: c_int) callconv(.C) void {

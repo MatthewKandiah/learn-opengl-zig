@@ -5,10 +5,22 @@ const c = @cImport({
     @cInclude("GLFW/glfw3.h");
 });
 
-const vertices = [_]f32{
+const single_triangle_vertices = [_]f32{
     -0.5, -0.5, 0.0,
     0.5,  -0.5, 0.0,
     0.0,  0.5,  0.0,
+};
+
+const double_triangle_vertices = [_]f32{
+    0.5,  0.5,  0.0,
+    0.5,  -0.5, 0.0,
+    -0.5, -0.5, 0.0,
+    -0.5, 0.5,  0.0,
+};
+
+const double_triangle_indices = [_]c_uint{
+    0, 1, 3,
+    1, 2, 3,
 };
 
 const vertex_shader_source: [*c]const u8 =
@@ -98,14 +110,29 @@ pub fn main() !void {
     c.glDeleteShader(vertex_shader);
     c.glDeleteShader(fragment_shader);
 
+    // single triangle setup
     var vao: c_uint = 0;
     c.glGenVertexArrays(1, &vao);
     var vbo: c_uint = 0;
     c.glGenBuffers(1, &vbo);
-
     c.glBindVertexArray(vao);
     c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
+    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(single_triangle_vertices)), &single_triangle_vertices, c.GL_STATIC_DRAW);
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @ptrFromInt(0));
+    c.glEnableVertexAttribArray(0);
+
+    // double triangle -> rectangle setup
+    var vao2: c_uint = 0;
+    c.glGenVertexArrays(1, &vao2);
+    var vbo2: c_uint = 0;
+    c.glGenBuffers(1, &vbo2);
+    var ebo: c_uint = 0;
+    c.glGenBuffers(1, &ebo);
+    c.glBindVertexArray(vao2);
+    c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo2);
+    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(double_triangle_vertices)), &double_triangle_vertices, c.GL_STATIC_DRAW);
+    c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
+    c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, @sizeOf(@TypeOf(double_triangle_indices)), &double_triangle_indices, c.GL_STATIC_DRAW);
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @ptrFromInt(0));
     c.glEnableVertexAttribArray(0);
 
@@ -114,8 +141,16 @@ pub fn main() !void {
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT);
         c.glUseProgram(shader_program);
-        c.glBindVertexArray(vao);
-        c.glDrawArrays(c.GL_TRIANGLES, 0, 3);
+
+        // // draw single triangle
+        // c.glBindVertexArray(vao);
+        // c.glDrawArrays(c.GL_TRIANGLES, 0, 3);
+
+        // draw double triangle rectangle
+        c.glBindVertexArray(vao2);
+        c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
+        c.glDrawElements(c.GL_TRIANGLES, 6, c.GL_UNSIGNED_INT, @ptrFromInt(0));
+
         c.glfwPollEvents();
         c.glfwSwapBuffers(window);
     }

@@ -4,8 +4,14 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const hello_window = Output{ .name = "hello_triangles", .src = "src/main.zig", .description = "Hello OpenGL Triangles", .target = target, .optimize = optimize };
-    hello_window.build(b);
+    const outputs = [_]Output{
+        .{ .name = "hello_triangles", .src = "src/hello_triangles.zig", .description = "Hello OpenGL Triangles", .target = target, .optimize = optimize },
+        .{ .name = "hello_triangles_ex_1", .src = "src/hello_triangles_ex_1.zig", .description = "2 triangles using more vertices", .target = target, .optimize = optimize },
+    };
+
+    for (outputs) |output| {
+        output.build(b);
+    }
 }
 
 const Output = struct {

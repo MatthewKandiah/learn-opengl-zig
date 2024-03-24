@@ -136,6 +136,12 @@ pub fn main() !void {
     c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @ptrFromInt(0));
     c.glEnableVertexAttribArray(0);
 
+    // Draw wireframe
+    c.glPolygonMode(c.GL_FRONT_AND_BACK, c.GL_LINE);
+
+    // // Draw filled
+    // c.glPolygonMode(c.GL_FRONT_AND_BACK, c.GL_FILL);
+
     while (c.glfwWindowShouldClose(window) == 0) {
         processInput(window);
         c.glClearColor(0.2, 0.3, 0.3, 1.0);

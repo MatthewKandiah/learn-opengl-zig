@@ -6,14 +6,14 @@ const c = @cImport({
 });
 
 const vertices1 = [_]f32{
-    -0.75, -0.5, 0.0, // triangle 1 bottom left
-    -0.25, -0.5, 0.0, // triangle 1 bottom right
-    -0.5, 0.5, 0.0, // triangle 1 top
+    -0.75, 0.5, 0.0, // triangle 1 top left
+    -0.25, 0.5, 0.0, // triangle 1 top right
+    -0.5, -0.5, 0.0, // triangle 1 bottom
 };
 const vertices2 = [_]f32{
-    0.25, 0.5, 0.0, // triangle 2 top left
-    0.75, 0.5, 0.0, // triangle 2 top right
-    0.5, -0.5, 0.0, // triangle 2 bottom
+    0.25, -0.5, 0.0, // triangle 2 bottom left
+    0.75, -0.5, 0.0, // triangle 2 bottom right
+    0.5, 0.5, 0.0, // triangle 2 top
 };
 
 const vertex_shader_source: [*c]const u8 =

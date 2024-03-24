@@ -7,6 +7,7 @@ pub fn build(b: *std.Build) void {
     const outputs = [_]Output{
         .{ .name = "hello_triangles", .src = "src/hello_triangles.zig", .description = "Hello OpenGL Triangles", .target = target, .optimize = optimize },
         .{ .name = "hello_triangles_ex_1", .src = "src/hello_triangles_ex_1.zig", .description = "2 triangles using more vertices", .target = target, .optimize = optimize },
+        .{ .name = "hello_triangles_ex_2", .src = "src/hello_triangles_ex_2.zig", .description = "2 triangle using separate VAOs and BAOs", .target = target, .optimize = optimize },
     };
 
     for (outputs) |output| {

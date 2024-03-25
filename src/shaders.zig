@@ -13,7 +13,7 @@ const single_triangle_vertices = [_]f32{
     0.0,  0.5,  0.0, 0.0, 0.0, 1.0,
 };
 
-const vertex_shader_source: [*c]const u8 = @embedFile("simple.vert");
+const vertex_shader_source: [*c]const u8 = @embedFile("simple-coloured.vert");
 
 const fragment_shader_source: [*c]const u8 = @embedFile("simple.frag");
 

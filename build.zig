@@ -10,6 +10,7 @@ pub fn build(b: *std.Build) void {
         .{ .name = "hello_triangles_ex_2", .src = "src/hello_triangles_ex_2.zig", .description = "2 triangle using separate VAOs and BAOs", .target = target, .optimize = optimize },
         .{ .name = "hello_triangles_ex_3", .src = "src/hello_triangles_ex_3.zig", .description = "2 triangles using separate fragment shaders to render in 2 different colours", .target = target, .optimize = optimize },
         .{ .name = "shaders", .src = "src/shaders.zig", .description = "Shaders beyond the bare basics", .target = target, .optimize = optimize },
+        .{ .name = "shaders_ex_1", .src = "src/shaders_ex_1.zig", .description = "Adjust vertical shader so rectangle is upside down", .target = target, .optimize = optimize },
     };
 
     for (outputs) |output| {

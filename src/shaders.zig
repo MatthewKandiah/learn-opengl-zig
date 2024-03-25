@@ -26,9 +26,11 @@ const fragment_shader_source: [*c]const u8 =
     \\#version 330 core
     \\out vec4 FragColor;
     \\
+    \\uniform vec4 ourColor;
+    \\
     \\void main()
     \\{
-    \\  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    \\  FragColor = ourColor;
     \\}
 ;
 
@@ -91,7 +93,12 @@ pub fn main() !void {
         processInput(window);
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT);
+
+        const time_value: f32 = @floatCast(c.glfwGetTime());
+        const green_value = (std.math.sin(time_value) / 2) + 0.5;
+        const vertex_color_location = c.glGetUniformLocation(shader_program, "ourColor");
         c.glUseProgram(shader_program);
+        c.glUniform4f(vertex_color_location, 0.0, green_value, 0.0, 1.0);
 
         // draw single triangle
         c.glBindVertexArray(vao);

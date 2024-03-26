@@ -13,6 +13,7 @@ pub fn build(b: *std.Build) void {
         .{ .name = "shaders_ex_1", .src = "src/shaders_ex_1.zig", .description = "Adjust vertical shader so rectangle is upside down", .target = target, .optimize = optimize },
         .{ .name = "shaders_ex_2", .src = "src/shaders_ex_2.zig", .description = "Use uniform to shift triangle to the right", .target = target, .optimize = optimize },
         .{ .name = "shaders_ex_3", .src = "src/shaders_ex_3.zig", .description = "Pass vertex position to fragment shader and set fragment colour to vertex position", .target = target, .optimize = optimize },
+        .{ .name = "textures", .src = "src/textures.zig", .description = "Introducing textures", .target = target, .optimize = optimize },
     };
 
     for (outputs) |output| {

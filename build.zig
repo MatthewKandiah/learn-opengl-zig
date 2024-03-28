@@ -45,8 +45,6 @@ const Output = struct {
         // Sources
         const glad_source_file = .{ .file = std.build.LazyPath{ .path = "deps/src/glad.c" }, .flags = &[_][]u8{} };
         exe.addCSourceFile(glad_source_file);
-        const stb_image_source_file = .{ .file = std.build.LazyPath{ .path = "deps/src/stb_image.c" }, .flags = &[_][]u8{} };
-        exe.addCSourceFile(stb_image_source_file);
 
         // Libraries
         exe.linkLibC();

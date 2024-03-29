@@ -12,25 +12,17 @@ const stb = @cImport({
     @cInclude("stb_image.h");
 });
 
-const double_triangle_vertices = [_]f32{
-    0.5,  0.5,  0.0,
-    0.5,  -0.5, 0.0,
-    -0.5, -0.5, 0.0,
-    -0.5, 0.5,  0.0,
-};
-
-const double_triangle_indices = [_]c_uint{
-    0, 1, 3,
-    1, 2, 3,
-};
-
 const vertex_shader_source: [*c]const u8 =
     \\#version 330 core
     \\layout (location = 0) in vec3 aPos;
+    \\layout (location = 1) in vec2 aTexCoord;
+    \\
+    \\out vec2 TexCoord;
     \\
     \\void main()
     \\{
-    \\  gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    \\  gl_Position = vec4(aPos, 1.0);
+    \\  TexCoord = aTexCoord;
     \\}
 ;
 
@@ -38,9 +30,13 @@ const fragment_shader_source: [*c]const u8 =
     \\#version 330 core
     \\out vec4 FragColor;
     \\
+    \\in vec2 TexCoord;
+    \\
+    \\uniform sampler2D texture1;
+    \\
     \\void main()
     \\{
-    \\  FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    \\  FragColor = texture(texture1, TexCoord);
     \\}
 ;
 
@@ -49,16 +45,6 @@ pub fn main() !void {
     defer {
         util.deinit();
     }
-
-    var width: c_int = undefined;
-    var height: c_int = undefined;
-    var nrChannels: c_int = undefined;
-    var data = stb.stbi_load("src/textures/container.jpg", &width, &height, &nrChannels, 0);
-    var texture: c_uint = 0;
-    c.glGenTextures(1, &texture);
-    c.glBindTexture(c.GL_TEXTURE_2D, texture);
-    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE, data);
-    c.glGenerateMipmap(c.GL_TEXTURE_2D);
 
     const vertex_shader = c.glCreateShader(c.GL_VERTEX_SHADER);
     c.glShaderSource(vertex_shader, 1, &vertex_shader_source, null);
@@ -96,19 +82,56 @@ pub fn main() !void {
     c.glDeleteShader(vertex_shader);
     c.glDeleteShader(fragment_shader);
 
+    const vertices = [_]f32{
+        0.5,  0.5,  0.0, 1.0, 1.0,
+        0.5,  -0.5, 0.0, 1.0, 0.0,
+        -0.5, -0.5, 0.0, 0.0, 0.0,
+        -0.5, 0.5,  0.0, 0.0, 1.0,
+    };
+
+    const indices = [_]c_uint{
+        0, 1, 3,
+        1, 2, 3,
+    };
+
     var vao: c_uint = 0;
     c.glGenVertexArrays(1, &vao);
     var vbo: c_uint = 0;
     c.glGenBuffers(1, &vbo);
     var ebo: c_uint = 0;
     c.glGenBuffers(1, &ebo);
+
     c.glBindVertexArray(vao);
+
     c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
-    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(double_triangle_vertices)), &double_triangle_vertices, c.GL_STATIC_DRAW);
+    c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(vertices)), &vertices, c.GL_STATIC_DRAW);
+
     c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
-    c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, @sizeOf(@TypeOf(double_triangle_indices)), &double_triangle_indices, c.GL_STATIC_DRAW);
-    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 3 * @sizeOf(f32), @ptrFromInt(0));
+    c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, @sizeOf(@TypeOf(indices)), &indices, c.GL_STATIC_DRAW);
+
+    // position attribute
+    c.glVertexAttribPointer(0, 3, c.GL_FLOAT, c.GL_FALSE, 5 * @sizeOf(f32), @ptrFromInt(0));
     c.glEnableVertexAttribArray(0);
+    // texture coordinates attribute
+    c.glVertexAttribPointer(1, 2, c.GL_FLOAT, c.GL_FALSE, 5 * @sizeOf(f32), @ptrFromInt(3 * @sizeOf(f32)));
+    c.glEnableVertexAttribArray(1);
+
+    // load and create texture
+    var texture: c_uint = 0;
+    c.glGenTextures(1, &texture);
+    c.glBindTexture(c.GL_TEXTURE_2D, texture);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
+    var width: c_int = undefined;
+    var height: c_int = undefined;
+    var nrChannels: c_int = undefined;
+    var data = stb.stbi_load("src/textures/container.jpg", &width, &height, &nrChannels, 0);
+    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE, data);
+    c.glGenerateMipmap(c.GL_TEXTURE_2D);
+    c.glUseProgram(shader_program);
+    c.glUniform1i(c.glGetUniformLocation(shader_program, "texture1"), 0);
 
     while (c.glfwWindowShouldClose(window) == 0) {
         processInput(window);
@@ -116,6 +139,8 @@ pub fn main() !void {
         c.glClear(c.GL_COLOR_BUFFER_BIT);
         c.glUseProgram(shader_program);
 
+        c.glActiveTexture(c.GL_TEXTURE0);
+        c.glBindTexture(c.GL_TEXTURE_2D, texture);
         c.glBindVertexArray(vao);
         c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
         c.glDrawElements(c.GL_TRIANGLES, 6, c.GL_UNSIGNED_INT, @ptrFromInt(0));

@@ -33,10 +33,11 @@ const fragment_shader_source: [*c]const u8 =
     \\in vec2 TexCoord;
     \\
     \\uniform sampler2D texture1;
+    \\uniform sampler2D texture2;
     \\
     \\void main()
     \\{
-    \\  FragColor = texture(texture1, TexCoord);
+    \\  FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
     \\}
 ;
 
@@ -138,14 +139,33 @@ pub fn main() !void {
     c.glUseProgram(shader_program);
     c.glUniform1i(c.glGetUniformLocation(shader_program, "texture1"), 0);
 
+    var texture2: c_uint = 0;
+    c.glGenTextures(1, &texture2);
+    c.glBindTexture(c.GL_TEXTURE_2D, texture2);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
+
+    data = stb.stbi_load("src/textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGBA, c.GL_UNSIGNED_BYTE, data);
+    c.glGenerateMipmap(c.GL_TEXTURE_2D);
+    stb.stbi_image_free(data);
+
+    c.glUseProgram(shader_program);
+    c.glUniform1i(c.glGetUniformLocation(shader_program, "texture2"), 1);
+
     while (c.glfwWindowShouldClose(window) == 0) {
         processInput(window);
         c.glClearColor(0.2, 0.3, 0.3, 1.0);
         c.glClear(c.GL_COLOR_BUFFER_BIT);
-        c.glUseProgram(shader_program);
 
         c.glActiveTexture(c.GL_TEXTURE0);
         c.glBindTexture(c.GL_TEXTURE_2D, texture1);
+        c.glActiveTexture(c.GL_TEXTURE1);
+        c.glBindTexture(c.GL_TEXTURE_2D, texture2);
+
+        c.glUseProgram(shader_program);
         c.glBindVertexArray(vao);
         c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
         c.glDrawElements(c.GL_TRIANGLES, 6, c.GL_UNSIGNED_INT, @ptrFromInt(0));

@@ -38,13 +38,14 @@ const Output = struct {
             .optimize = self.optimize,
         });
         b.installArtifact(exe);
-
         // Includes
         exe.addIncludePath(.{ .path = "deps/include" });
 
         // Sources
         const glad_source_file = .{ .file = std.build.LazyPath{ .path = "deps/src/glad.c" }, .flags = &[_][]u8{} };
         exe.addCSourceFile(glad_source_file);
+        const stb_image_source_file = .{ .file = std.build.LazyPath{ .path = "deps/src/stb_image_impl.c" }, .flags = &[_][]u8{} };
+        exe.addCSourceFile(stb_image_source_file);
 
         // Libraries
         exe.linkLibC();

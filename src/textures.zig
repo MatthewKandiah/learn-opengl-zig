@@ -9,7 +9,6 @@ const c = @cImport({
 // I get build errors if this is included in the main cImport block
 // Splitting out a separate cImport block seems to fix it, would be interesting to bottom out why!
 const stb = @cImport({
-    @cDefine("STB_IMAGE_IMPLEMENTATION", {});
     @cInclude("stb_image.h");
 });
 
@@ -51,6 +50,16 @@ pub fn main() !void {
         util.deinit();
     }
 
+    var width: c_int = undefined;
+    var height: c_int = undefined;
+    var nrChannels: c_int = undefined;
+    var data = stb.stbi_load("src/textures/container.jpg", &width, &height, &nrChannels, 0);
+    var texture: c_uint = 0;
+    c.glGenTextures(1, &texture);
+    c.glBindTexture(c.GL_TEXTURE_2D, texture);
+    c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE, data);
+    c.glGenerateMipmap(c.GL_TEXTURE_2D);
+
     const vertex_shader = c.glCreateShader(c.GL_VERTEX_SHADER);
     c.glShaderSource(vertex_shader, 1, &vertex_shader_source, null);
     c.glCompileShader(vertex_shader);
@@ -87,14 +96,14 @@ pub fn main() !void {
     c.glDeleteShader(vertex_shader);
     c.glDeleteShader(fragment_shader);
 
-    var vao2: c_uint = 0;
-    c.glGenVertexArrays(1, &vao2);
-    var vbo2: c_uint = 0;
-    c.glGenBuffers(1, &vbo2);
+    var vao: c_uint = 0;
+    c.glGenVertexArrays(1, &vao);
+    var vbo: c_uint = 0;
+    c.glGenBuffers(1, &vbo);
     var ebo: c_uint = 0;
     c.glGenBuffers(1, &ebo);
-    c.glBindVertexArray(vao2);
-    c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo2);
+    c.glBindVertexArray(vao);
+    c.glBindBuffer(c.GL_ARRAY_BUFFER, vbo);
     c.glBufferData(c.GL_ARRAY_BUFFER, @sizeOf(@TypeOf(double_triangle_vertices)), &double_triangle_vertices, c.GL_STATIC_DRAW);
     c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
     c.glBufferData(c.GL_ELEMENT_ARRAY_BUFFER, @sizeOf(@TypeOf(double_triangle_indices)), &double_triangle_indices, c.GL_STATIC_DRAW);
@@ -107,7 +116,7 @@ pub fn main() !void {
         c.glClear(c.GL_COLOR_BUFFER_BIT);
         c.glUseProgram(shader_program);
 
-        c.glBindVertexArray(vao2);
+        c.glBindVertexArray(vao);
         c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
         c.glDrawElements(c.GL_TRIANGLES, 6, c.GL_UNSIGNED_INT, @ptrFromInt(0));
 

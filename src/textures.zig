@@ -117,9 +117,9 @@ pub fn main() !void {
     c.glEnableVertexAttribArray(1);
 
     // load and create texture
-    var texture: c_uint = 0;
-    c.glGenTextures(1, &texture);
-    c.glBindTexture(c.GL_TEXTURE_2D, texture);
+    var texture1: c_uint = 0;
+    c.glGenTextures(1, &texture1);
+    c.glBindTexture(c.GL_TEXTURE_2D, texture1);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
@@ -127,7 +127,8 @@ pub fn main() !void {
     var width: c_int = undefined;
     var height: c_int = undefined;
     var nrChannels: c_int = undefined;
-    var data = stb.stbi_load("src/textures/container.jpg", &width, &height, &nrChannels, 0);
+    var data: [*]u8 = undefined;
+    data = stb.stbi_load("src/textures/container.jpg", &width, &height, &nrChannels, 0);
     c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE, data);
     c.glGenerateMipmap(c.GL_TEXTURE_2D);
     c.glUseProgram(shader_program);
@@ -140,7 +141,7 @@ pub fn main() !void {
         c.glUseProgram(shader_program);
 
         c.glActiveTexture(c.GL_TEXTURE0);
-        c.glBindTexture(c.GL_TEXTURE_2D, texture);
+        c.glBindTexture(c.GL_TEXTURE_2D, texture1);
         c.glBindVertexArray(vao);
         c.glBindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, ebo);
         c.glDrawElements(c.GL_TRIANGLES, 6, c.GL_UNSIGNED_INT, @ptrFromInt(0));

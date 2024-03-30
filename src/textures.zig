@@ -37,7 +37,7 @@ const fragment_shader_source: [*c]const u8 =
     \\
     \\void main()
     \\{
-    \\  FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
+    \\  FragColor = mix(texture(texture1, TexCoord), texture(texture2, vec2(1.0 - TexCoord.s, TexCoord.t)), 0.2);
     \\}
 ;
 

@@ -131,6 +131,8 @@ pub fn main() !void {
     var nrChannels: c_int = undefined;
     var data: [*]u8 = undefined;
 
+    stb.stbi_set_flip_vertically_on_load(1);
+
     data = stb.stbi_load("src/textures/container.jpg", &width, &height, &nrChannels, 0);
     c.glTexImage2D(c.GL_TEXTURE_2D, 0, c.GL_RGB, width, height, 0, c.GL_RGB, c.GL_UNSIGNED_BYTE, data);
     c.glGenerateMipmap(c.GL_TEXTURE_2D);

@@ -37,7 +37,7 @@ const fragment_shader_source: [*c]const u8 =
     \\
     \\void main()
     \\{
-    \\  FragColor = mix(texture(texture1, TexCoord), texture(texture2, vec2(1.0 - TexCoord.s, TexCoord.t)), 0.2);
+    \\  FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
     \\}
 ;
 
@@ -84,10 +84,10 @@ pub fn main() !void {
     c.glDeleteShader(fragment_shader);
 
     const vertices = [_]f32{
-        0.5,  0.5,  0.0, 1.0, 1.0,
-        0.5,  -0.5, 0.0, 1.0, 0.0,
+        0.5,  0.5,  0.0, 2.0, 2.0,
+        0.5,  -0.5, 0.0, 2.0, 0.0,
         -0.5, -0.5, 0.0, 0.0, 0.0,
-        -0.5, 0.5,  0.0, 0.0, 1.0,
+        -0.5, 0.5,  0.0, 0.0, 2.0,
     };
 
     const indices = [_]c_uint{
@@ -121,8 +121,8 @@ pub fn main() !void {
     var texture1: c_uint = 0;
     c.glGenTextures(1, &texture1);
     c.glBindTexture(c.GL_TEXTURE_2D, texture1);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_CLAMP_TO_EDGE);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_CLAMP_TO_EDGE);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
 
@@ -144,8 +144,8 @@ pub fn main() !void {
     var texture2: c_uint = 0;
     c.glGenTextures(1, &texture2);
     c.glBindTexture(c.GL_TEXTURE_2D, texture2);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_REPEAT);
-    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_S, c.GL_MIRRORED_REPEAT);
+    c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_WRAP_T, c.GL_MIRRORED_REPEAT);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MIN_FILTER, c.GL_LINEAR);
     c.glTexParameteri(c.GL_TEXTURE_2D, c.GL_TEXTURE_MAG_FILTER, c.GL_LINEAR);
 
